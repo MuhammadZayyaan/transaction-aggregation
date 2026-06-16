@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="002-seed-sso-data" author="transaction-aggregation" context="local,int">
+        <comment>Seed SSO table with test users. Passwords are BCrypt hashed.</comment>
+
+        <!-- admin / admin123 -->
+        <insert tableName="sso">
+            <column name="username" value="admin"/>
+            <column name="password" value="$2a$10$7suXmn8X8f8Nomjc4mwA/eBT/eCoWpiJnmsZMYfklApmks4scJRJe"/>
+            <column name="status" valueNumeric="1"/>
+            <column name="failed_attempts" valueNumeric="0"/>
+            <column name="successful_login" valueDate="2026-06-14T09:52:13"/>
+            <column name="failed_login" valueDate="2026-06-10T09:52:13"/>
+        </insert>
+
+        <!-- user1 / user123 -->
+        <insert tableName="sso">
+            <column name="username" value="user1"/>
+            <column name="password" value="$2a$10$EWIGCCp.qlbx.rQ8E6X9WO1EwdmreiY5XYIYEG4m6ZS0yK7MQM6ha"/>
+            <column name="status" valueNumeric="1"/>
+            <column name="failed_attempts" valueNumeric="2"/>
+            <column name="successful_login" valueDate="2026-06-14T09:52:13"/>
+            <column name="failed_login" valueDate="2026-06-14T09:52:13"/>
+        </insert>
+
+        <!-- user2 / user234 (status=2 means locked) -->
+        <insert tableName="sso">
+            <column name="username" value="user2"/>
+            <column name="password" value="$2a$10$r6NQ5xlYsZ1J4lo6q1P8y.AnxOhwcnlamvMkYKVziteRcDA7721VC"/>
+            <column name="status" valueNumeric="2"/>
+            <column name="failed_attempts" valueNumeric="3"/>
+            <column name="successful_login" valueDate="2026-06-14T09:52:13"/>
+            <column name="failed_login" valueDate="2026-06-14T09:52:13"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

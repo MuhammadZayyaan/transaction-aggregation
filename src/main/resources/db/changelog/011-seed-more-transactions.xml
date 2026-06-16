@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="011-seed-more-transactions" author="transaction-aggregation" context="local,int">
+        <comment>Additional mock payments and transfers for richer dashboard data</comment>
+
+        <!-- More payments for user 1 (admin) -->
+        <insert tableName="payments">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="PAY102938"/>
+            <column name="timestamp" valueDate="2026-06-08T08:45:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="89.99"/>
+            <column name="description" value="Netflix subscription"/>
+            <column name="category" value="entertainment"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="payments">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="PAY203847"/>
+            <column name="timestamp" valueDate="2026-06-09T12:30:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="2100.00"/>
+            <column name="description" value="Engen fuel"/>
+            <column name="category" value="transport"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="payments">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="PAY304756"/>
+            <column name="timestamp" valueDate="2026-06-11T17:20:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="560.00"/>
+            <column name="description" value="Checkers groceries"/>
+            <column name="category" value="groceries"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="payments">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="PAY405665"/>
+            <column name="timestamp" valueDate="2026-06-13T19:00:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="350.00"/>
+            <column name="description" value="Mr Delivery"/>
+            <column name="category" value="food delivery"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="payments">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="PAY506574"/>
+            <column name="timestamp" valueDate="2026-06-14T06:00:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="1899.00"/>
+            <column name="description" value="Discovery Health"/>
+            <column name="category" value="medical"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="payments">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="PAY607483"/>
+            <column name="timestamp" valueDate="2026-06-07T10:15:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="4500.00"/>
+            <column name="description" value="Vodacom contract"/>
+            <column name="category" value="utilities"/>
+            <column name="status" value="failed"/>
+        </insert>
+
+        <!-- More payments for user 2 -->
+        <insert tableName="payments">
+            <column name="user_id" valueNumeric="2"/>
+            <column name="reference" value="PAY708392"/>
+            <column name="timestamp" valueDate="2026-06-10T09:00:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="750.00"/>
+            <column name="description" value="Pick n Pay"/>
+            <column name="category" value="groceries"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="payments">
+            <column name="user_id" valueNumeric="2"/>
+            <column name="reference" value="PAY809201"/>
+            <column name="timestamp" valueDate="2026-06-12T14:30:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="199.00"/>
+            <column name="description" value="Spotify Premium"/>
+            <column name="category" value="entertainment"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <!-- More transfers for user 1 (admin) -->
+        <insert tableName="transfers">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="TRAN112233"/>
+            <column name="timestamp" valueDate="2026-06-08T07:00:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="8500.00"/>
+            <column name="description" value="Rent payment"/>
+            <column name="from_account" value="3832023030"/>
+            <column name="to_account" value="62019283"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="transfers">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="TRAN223344"/>
+            <column name="timestamp" valueDate="2026-06-10T15:45:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="2000.00"/>
+            <column name="description" value="Payment to mom"/>
+            <column name="from_account" value="3832023030"/>
+            <column name="to_account" value="44820193"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="transfers">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="TRAN334455"/>
+            <column name="timestamp" valueDate="2026-06-12T09:30:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="25000.00"/>
+            <column name="description" value="Car insurance"/>
+            <column name="from_account" value="3832023030"/>
+            <column name="to_account" value="77293018"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="transfers">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="TRAN445566"/>
+            <column name="timestamp" valueDate="2026-06-13T16:00:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="500.00"/>
+            <column name="description" value="Lunch split"/>
+            <column name="from_account" value="3832023030"/>
+            <column name="to_account" value="88192037"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <!-- More transfers for user 2 -->
+        <insert tableName="transfers">
+            <column name="user_id" valueNumeric="2"/>
+            <column name="reference" value="TRAN556677"/>
+            <column name="timestamp" valueDate="2026-06-09T11:00:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="12000.00"/>
+            <column name="description" value="Rent payment"/>
+            <column name="from_account" value="382902032"/>
+            <column name="to_account" value="99283746"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="transfers">
+            <column name="user_id" valueNumeric="2"/>
+            <column name="reference" value="TRAN667788"/>
+            <column name="timestamp" valueDate="2026-06-14T08:30:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="3500.00"/>
+            <column name="description" value="Gym membership"/>
+            <column name="from_account" value="382902032"/>
+            <column name="to_account" value="11928374"/>
+            <column name="status" value="failed"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

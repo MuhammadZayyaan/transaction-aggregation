@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="009-seed-payments-data" author="transaction-aggregation" context="local,int">
+        <comment>Seed payments table with mock data</comment>
+
+        <insert tableName="payments">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="PAY378283"/>
+            <column name="timestamp" valueDate="2026-06-10T14:30:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="1250.00"/>
+            <column name="description" value="Woolworths Food"/>
+            <column name="category" value="groceries"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="payments">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="PAY893423"/>
+            <column name="timestamp" valueDate="2026-06-12T09:15:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="450.00"/>
+            <column name="description" value="Uber Eats"/>
+            <column name="category" value="food delivery"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="payments">
+            <column name="user_id" valueNumeric="2"/>
+            <column name="reference" value="PAY002393"/>
+            <column name="timestamp" valueDate="2026-06-13T16:45:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="3200.00"/>
+            <column name="description" value="Takealot order"/>
+            <column name="category" value="shopping"/>
+            <column name="status" value="failed"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="010-seed-transfers-data" author="transaction-aggregation" context="local,int">
+        <comment>Seed transfers table with mock data</comment>
+
+        <insert tableName="transfers">
+            <column name="user_id" valueNumeric="3"/>
+            <column name="reference" value="TRAN378283"/>
+            <column name="timestamp" valueDate="2026-06-11T10:00:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="5000.00"/>
+            <column name="description" value="Rent payment"/>
+            <column name="from_account" value="738372203"/>
+            <column name="to_account" value="32998302"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="transfers">
+            <column name="user_id" valueNumeric="2"/>
+            <column name="reference" value="TRAN893423"/>
+            <column name="timestamp" valueDate="2026-06-12T11:30:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="2500.00"/>
+            <column name="description" value="Salary advance"/>
+            <column name="from_account" value="382902032"/>
+            <column name="to_account" value="38299380"/>
+            <column name="status" value="successful"/>
+        </insert>
+
+        <insert tableName="transfers">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="reference" value="TRAN002393"/>
+            <column name="timestamp" valueDate="2026-06-13T08:00:00"/>
+            <column name="currency" value="ZAR"/>
+            <column name="amount" valueNumeric="15000.00"/>
+            <column name="description" value="Investment deposit"/>
+            <column name="from_account" value="3832023030"/>
+            <column name="to_account" value="33923890"/>
+            <column name="status" value="failed"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

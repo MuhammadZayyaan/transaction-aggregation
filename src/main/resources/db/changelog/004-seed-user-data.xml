@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="004-seed-user-data" author="transaction-aggregation" context="local,int">
+        <comment>Seed user table with test data linked to SSO users.</comment>
+
+        <!-- admin (user_id=1) -->
+        <insert tableName="app_user">
+            <column name="user_id" valueNumeric="1"/>
+            <column name="first_name" value="Muhammad Zayyaan"/>
+            <column name="last_name" value="Rampurtab"/>
+            <column name="country" value="RSA"/>
+            <column name="id_type" value="RSAID"/>
+            <column name="id_reference" value="999999999999"/>
+        </insert>
+
+        <!-- user1 (user_id=2) -->
+        <insert tableName="app_user">
+            <column name="user_id" valueNumeric="2"/>
+            <column name="first_name" value="John"/>
+            <column name="last_name" value="Smith"/>
+            <column name="country" value="NAM"/>
+            <column name="id_type" value="PASSPORT"/>
+            <column name="id_reference" value="AGS66723"/>
+        </insert>
+
+        <!-- user2 (user_id=3) -->
+        <insert tableName="app_user">
+            <column name="user_id" valueNumeric="3"/>
+            <column name="first_name" value="Jane"/>
+            <column name="last_name" value="Rivers"/>
+            <column name="country" value="RSA"/>
+            <column name="id_type" value="RSAID"/>
+            <column name="id_reference" value="88888888888"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

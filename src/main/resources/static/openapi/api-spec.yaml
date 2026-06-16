@@ -1,0 +1,433 @@
+openapi: 3.0.3
+info:
+  title: MZR Bank - Transaction Aggregation API
+  description: REST API for transaction aggregation with authentication and role-based access
+  version: 0.0.1-SNAPSHOT
+  contact:
+    name: MZR Bank Digital
+    email: digital@mzrbank.co.za
+
+servers:
+  - url: http://localhost:8080/transaction-aggregation
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: admin
+        password:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: admin123
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        token:
+          type: string
+          nullable: true
+        username:
+          type: string
+          nullable: true
+        message:
+          type: string
+
+    UserProfile:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        firstName:
+          type: string
+        lastName:
+          type: string
+        country:
+          type: string
+        idType:
+          type: string
+        idReference:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN, USER]
+
+    Transaction:
+      type: object
+      properties:
+        reference:
+          type: string
+        description:
+          type: string
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+        category:
+          type: string
+        timestamp:
+          type: string
+        type:
+          type: string
+          enum: [payment, transfer]
+        status:
+          type: string
+          enum: [successful, failed]
+
+    AggregationResult:
+      type: object
+      properties:
+        totalTransactions:
+          type: integer
+        totalAmount:
+          type: number
+          format: double
+        amountByCategory:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        reference:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        amount:
+          type: number
+          format: double
+        description:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+          enum: [successful, failed]
+
+    Transfer:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        reference:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        currency:
+          type: string
+        amount:
+          type: number
+          format: double
+        description:
+          type: string
+        fromAccount:
+          type: string
+        toAccount:
+          type: string
+        status:
+          type: string
+          enum: [successful, failed]
+
+    ApiTokenResponse:
+      type: object
+      properties:
+        apiToken:
+          type: string
+        tokenType:
+          type: string
+        expiresIn:
+          type: string
+        signedWith:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        status:
+          type: integer
+
+paths:
+  /api/auth/login:
+    post:
+      summary: Authenticate user
+      operationId: login
+      tags: [Authentication]
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  /api/auth/logout:
+    post:
+      summary: Logout and invalidate session
+      operationId: logout
+      tags: [Authentication]
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /api/token/generate:
+    post:
+      summary: Generate RSA-signed API token (admin only)
+      operationId: generateApiToken
+      tags: [Authentication]
+      responses:
+        '200':
+          description: API token generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiTokenResponse'
+        '403':
+          description: Not authorized (non-admin)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/token/validate:
+    get:
+      summary: Validate an API token
+      operationId: validateApiToken
+      tags: [Authentication]
+      parameters:
+        - name: X-API-Token
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Token validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  username:
+                    type: string
+                  userId:
+                    type: integer
+                    format: int64
+                  tokenType:
+                    type: string
+        '401':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/user/me:
+    get:
+      summary: Get current user profile
+      operationId: getCurrentUser
+      tags: [User]
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: User not found
+
+  /api/transactions:
+    get:
+      summary: Get all transactions for authenticated user
+      operationId: getAllTransactions
+      tags: [Transactions]
+      responses:
+        '200':
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/transactions/payments:
+    get:
+      summary: Get payment transactions only
+      operationId: getPayments
+      tags: [Transactions]
+      responses:
+        '200':
+          description: List of payment transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/transactions/transfers:
+    get:
+      summary: Get transfer transactions only
+      operationId: getTransfers
+      tags: [Transactions]
+      responses:
+        '200':
+          description: List of transfers with account details
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transfer'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/transactions/aggregate:
+    get:
+      summary: Get transaction aggregation summary
+      operationId: getAggregation
+      tags: [Transactions]
+      responses:
+        '200':
+          description: Aggregation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AggregationResult'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /mock/api/payments/{userId}:
+    get:
+      summary: Mock payment service - get payments by user
+      operationId: getMockPayments
+      tags: [Mock APIs]
+      security: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: List of payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'
+
+  /mock/api/transfers/{userId}:
+    get:
+      summary: Mock transfer service - get transfers by user
+      operationId: getMockTransfers
+      tags: [Mock APIs]
+      security: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: List of transfers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transfer'

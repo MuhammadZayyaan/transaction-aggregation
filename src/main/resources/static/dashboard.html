@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MZR Bank - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f0f4f8;
+            color: #1a1a1a;
+            min-height: 100vh;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 40px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .header-logo { display: flex; align-items: center; gap: 14px; }
+        .logo-icon { display: flex; align-items: center; }
+        .logo-icon svg { width: 44px; height: 44px; }
+        .logo-text-group { display: flex; flex-direction: column; line-height: 1.1; }
+        .logo-name { font-size: 22px; font-weight: 700; color: #333; letter-spacing: 2px; text-transform: uppercase; }
+        .logo-subtitle { font-size: 12px; font-weight: 600; color: #555; letter-spacing: 4px; text-transform: uppercase; }
+        .header-right { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+        .btn-logout { padding: 6px 16px; background: #555; color: #fff; border: none; border-radius: 3px; cursor: pointer; font-size: 13px; }
+        .btn-logout:hover { background: #333; }
+        .main { max-width: 1100px; margin: 0 auto; padding: 48px 40px; }
+        .welcome { font-size: 24px; margin-bottom: 4px; }
+        .last-login { font-size: 13px; color: #888; margin-bottom: 32px; }
+        .card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .card h3 { margin-bottom: 16px; font-size: 16px; }
+        .user-details {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 8px 16px;
+            font-size: 14px;
+        }
+        .user-details dt { font-weight: 600; color: #555; }
+        .user-details dd { color: #1a1a1a; }
+        .btn-api-testing {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .btn-api-testing:hover { background: #333; }
+
+        /* Donut chart */
+        .chart-container {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+        .donut-wrapper {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+        .donut-wrapper canvas { width: 200px; height: 200px; }
+        .donut-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .donut-center .total-amount { font-size: 18px; font-weight: 700; }
+        .donut-center .total-label { font-size: 11px; color: #888; }
+        .chart-legend { font-size: 13px; }
+        .chart-legend .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .chart-legend .legend-color { width: 14px; height: 14px; border-radius: 3px; }
+
+        /* Bubble transactions */
+        .transactions-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 12px 0;
+        }
+        .tx-bubble {
+            flex-shrink: 0;
+            padding: 12px 16px;
+            border-radius: 20px;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
+            font-size: 12px;
+            min-width: 160px;
+            text-align: center;
+        }
+        .tx-bubble .tx-amount { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+        .tx-bubble .tx-desc { color: #555; margin-bottom: 2px; }
+        .tx-bubble .tx-ref { color: #888; font-size: 11px; }
+        .tx-bubble.successful { border-color: #4caf50; background: #e8f5e9; }
+        .tx-bubble.failed { border-color: #f44336; background: #ffeaea; }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .data-table th {
+            text-align: left;
+            padding: 10px 12px;
+            background: #f5f5f5;
+            border-bottom: 2px solid #e0e0e0;
+            font-weight: 600;
+            color: #555;
+        }
+        .data-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .status-pill {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-pill.successful { background: #e8f5e9; color: #2e7d32; }
+        .status-pill.failed { background: #ffeaea; color: #d32f2f; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M30 5 C16 5 5 16 5 30 C5 38 8 44 14 48 L14 38 C10 35 8 33 8 30 C8 18 18 8 30 8 C36 8 40 10 43 14 L48 14 C44 8 38 5 30 5Z" fill="#333333"/>
+                    <path d="M30 55 C44 55 55 44 55 30 C55 22 52 16 46 12 L46 22 C50 25 52 27 52 30 C52 42 42 52 30 52 C24 52 20 50 17 46 L12 46 C16 52 22 55 30 55Z" fill="#666666"/>
+                </svg>
+            </div>
+            <div class="logo-text-group">
+                <span class="logo-name">MZR</span>
+                <span class="logo-subtitle">Bank</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <span id="welcomeUser"></span>
+            <button class="btn-logout" id="logoutBtn">Logout</button>
+        </div>
+    </header>
+
+    <main class="main">
+        <h1 class="welcome">Welcome, <span id="displayName">...</span></h1>
+        <p class="last-login" id="lastLogin"></p>
+
+        <div class="card" id="adminCard" style="display:none;">
+            <h3>Admin Tools</h3>
+            <a href="/transaction-aggregation/api-testing.html" class="btn-api-testing">API Testing Tool</a>
+        </div>
+
+        <div class="card">
+            <h3>Your Profile</h3>
+            <dl class="user-details" id="userDetails">
+                <dt>Loading...</dt><dd></dd>
+            </dl>
+        </div>
+
+        <div class="card">
+            <h3>Transaction Summary</h3>
+            <div class="chart-container">
+                <div class="donut-wrapper">
+                    <canvas id="donutChart" width="200" height="200"></canvas>
+                    <div class="donut-center">
+                        <div class="total-amount" id="totalAmount">...</div>
+                        <div class="total-label">Total</div>
+                    </div>
+                </div>
+                <div class="chart-legend" id="chartLegend"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Recent Transactions</h3>
+            <div class="transactions-scroll" id="transactionsBubbles">
+                <div class="tx-bubble"><div class="tx-desc">Loading...</div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Payments</h3>
+            <table class="data-table" id="paymentsTable">
+                <thead>
+                    <tr><th>Reference</th><th>Description</th><th>Amount</th><th>Currency</th><th>Category</th><th>Date</th><th>Status</th></tr>
+                </thead>
+                <tbody id="paymentsBody"><tr><td colspan="7">Loading...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>Transfers</h3>
+            <table class="data-table" id="transfersTable">
+                <thead>
+                    <tr><th>Reference</th><th>Description</th><th>Amount</th><th>From Account</th><th>To Account</th><th>Date</th><th>Status</th></tr>
+                </thead>
+                <tbody id="transfersBody"><tr><td colspan="7">Loading...</td></tr></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        const token = sessionStorage.getItem('token');
+        const username = sessionStorage.getItem('username');
+        if (!token) { window.location.href = '/transaction-aggregation/login.html'; }
+        document.getElementById('welcomeUser').textContent = username;
+
+        // Decode JWT to get lastLogin
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            if (payload.lastLogin) {
+                document.getElementById('lastLogin').textContent = 'Last login ' + payload.lastLogin;
+            }
+        } catch(e) {}
+
+        const headers = { 'Authorization': 'Bearer ' + token };
+        const COLORS = ['#a8d8ea', '#f9b4c2', '#c3e8bd', '#f5d5a0', '#d4b8e0', '#b8d4e3'];
+
+        // --- USER PROFILE ---
+        fetch('/transaction-aggregation/api/user/me', { headers })
+        .then(r => { if (r.status === 401) { sessionStorage.clear(); window.location.href = '/transaction-aggregation/login.html'; } return r.json(); })
+        .then(user => {
+            if (!user) return;
+            document.getElementById('displayName').textContent = user.firstName + ' ' + user.lastName;
+            document.getElementById('welcomeUser').textContent = user.firstName + ' ' + user.lastName;
+            document.getElementById('userDetails').innerHTML = `
+                <dt>Name</dt><dd>${user.firstName} ${user.lastName}</dd>
+                <dt>Country</dt><dd>${user.country}</dd>
+                <dt>ID Type</dt><dd>${user.idType}</dd>
+                <dt>ID Reference</dt><dd>${user.idReference}</dd>
+                <dt>Role</dt><dd>${user.role}</dd>
+            `;
+            if (user.role === 'ADMIN') { document.getElementById('adminCard').style.display = 'block'; }
+        });
+
+        // --- DONUT CHART (Transaction Summary) ---
+        fetch('/transaction-aggregation/api/transactions/aggregate', { headers })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('totalAmount').textContent = 'R ' + data.totalAmount.toLocaleString();
+            drawDonut(data.amountByCategory);
+        });
+
+        function drawDonut(categories) {
+            const canvas = document.getElementById('donutChart');
+            const ctx = canvas.getContext('2d');
+            const entries = Object.entries(categories);
+            const total = entries.reduce((s, [, v]) => s + v, 0);
+            const cx = 100, cy = 100, r = 80, lineWidth = 30;
+
+            let startAngle = -Math.PI / 2;
+            const legendEl = document.getElementById('chartLegend');
+            legendEl.innerHTML = '';
+
+            entries.forEach(([cat, amt], i) => {
+                const slice = (amt / total) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, startAngle, startAngle + slice);
+                ctx.strokeStyle = COLORS[i % COLORS.length];
+                ctx.lineWidth = lineWidth;
+                ctx.stroke();
+                startAngle += slice;
+
+                legendEl.innerHTML += `<div class="legend-item">
+                    <div class="legend-color" style="background:${COLORS[i % COLORS.length]}"></div>
+                    <span>${cat}: R ${amt.toLocaleString()}</span>
+                </div>`;
+            });
+        }
+
+        // --- BUBBLE TRANSACTIONS ---
+        fetch('/transaction-aggregation/api/transactions', { headers })
+        .then(r => r.json())
+        .then(data => {
+            const container = document.getElementById('transactionsBubbles');
+            container.innerHTML = data.map(tx => `
+                <div class="tx-bubble ${tx.status}">
+                    <div class="tx-amount">R ${Number(tx.amount).toLocaleString()}</div>
+                    <div class="tx-desc">${tx.description}</div>
+                    <div class="tx-ref">${tx.reference} · ${tx.type}</div>
+                </div>
+            `).join('');
+        });
+
+        // --- PAYMENTS TABLE ---
+        fetch('/transaction-aggregation/api/transactions/payments', { headers })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('paymentsBody').innerHTML = data.map(p => `
+                <tr>
+                    <td>${p.reference}</td>
+                    <td>${p.description || '-'}</td>
+                    <td>R ${Number(p.amount).toLocaleString()}</td>
+                    <td>${p.currency}</td>
+                    <td>${p.category || '-'}</td>
+                    <td>${p.timestamp ? p.timestamp.replace('T', ' ') : '-'}</td>
+                    <td><span class="status-pill ${p.status}">${p.status}</span></td>
+                </tr>
+            `).join('') || '<tr><td colspan="7">No payments found.</td></tr>';
+        });
+
+        // --- TRANSFERS TABLE ---
+        fetch('/transaction-aggregation/api/transactions/transfers', { headers })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('transfersBody').innerHTML = data.map(t => `
+                <tr>
+                    <td>${t.reference}</td>
+                    <td>${t.description || '-'}</td>
+                    <td>R ${Number(t.amount).toLocaleString()}</td>
+                    <td>${t.fromAccount || '-'}</td>
+                    <td>${t.toAccount || '-'}</td>
+                    <td>${t.timestamp ? t.timestamp.replace('T', ' ') : '-'}</td>
+                    <td><span class="status-pill ${t.status}">${t.status}</span></td>
+                </tr>
+            `).join('') || '<tr><td colspan="7">No transfers found.</td></tr>';
+        });
+
+        // --- LOGOUT ---
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            fetch('/transaction-aggregation/api/auth/logout', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            }).finally(() => {
+                sessionStorage.clear();
+                window.location.href = '/transaction-aggregation/login.html';
+            });
+        });
+    </script>
+</body>
+</html>

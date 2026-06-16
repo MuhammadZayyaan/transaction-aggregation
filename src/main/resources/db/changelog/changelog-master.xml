@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <include file="db/changelog/001-create-sso-table.xml"/>
+    <include file="db/changelog/002-seed-sso-data.xml"/>
+    <include file="db/changelog/003-create-user-table.xml"/>
+    <include file="db/changelog/004-seed-user-data.xml"/>
+    <include file="db/changelog/005-create-role-table.xml"/>
+    <include file="db/changelog/006-seed-role-data.xml"/>
+    <include file="db/changelog/007-create-payments-table.xml"/>
+    <include file="db/changelog/008-create-transfers-table.xml"/>
+    <include file="db/changelog/009-seed-payments-data.xml"/>
+    <include file="db/changelog/010-seed-transfers-data.xml"/>
+    <include file="db/changelog/011-seed-more-transactions.xml"/>
+
+</databaseChangeLog>

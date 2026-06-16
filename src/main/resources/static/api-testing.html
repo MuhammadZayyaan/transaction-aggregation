@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MZR Bank - API Testing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f0f4f8; color: #1a1a1a; min-height: 100vh; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 16px 40px; background-color: #fff; border-bottom: 1px solid #e0e0e0; }
+        .header-logo { display: flex; align-items: center; gap: 14px; }
+        .logo-icon { display: flex; align-items: center; }
+        .logo-icon svg { width: 44px; height: 44px; }
+        .logo-text-group { display: flex; flex-direction: column; line-height: 1.1; }
+        .logo-name { font-size: 22px; font-weight: 700; color: #333; letter-spacing: 2px; text-transform: uppercase; }
+        .logo-subtitle { font-size: 12px; font-weight: 600; color: #555; letter-spacing: 4px; text-transform: uppercase; }
+        .header-right { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+        .btn { padding: 8px 16px; background: #555; color: #fff; border: none; border-radius: 3px; cursor: pointer; font-size: 13px; text-decoration: none; }
+        .btn:hover { background: #333; }
+        .main { max-width: 1100px; margin: 0 auto; padding: 48px 40px; }
+        h1 { font-size: 24px; margin-bottom: 16px; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 2px solid #e0e0e0; }
+        .tab { padding: 10px 24px; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: #888; }
+        .tab.active { color: #1a1a1a; border-bottom-color: #333; }
+        .tab:hover { color: #1a1a1a; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Shared */
+        .api-selector { margin-bottom: 24px; }
+        .api-selector select { padding: 8px 12px; border: 1px solid #ccc; border-radius: 3px; font-size: 14px; min-width: 400px; }
+        .api-selector select optgroup { color: #333; font-weight: 700; }
+        .request-body-section { display: none; margin-top: 12px; }
+        .request-body-section.visible { display: block; }
+        .request-body-section label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px; }
+        .request-body-section textarea { width: 100%; height: 120px; padding: 12px; font-family: 'SF Mono', Consolas, monospace; font-size: 13px; border: 1px solid #ccc; border-radius: 3px; resize: vertical; }
+        .result-panel { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; margin-top: 16px; }
+        .result-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #f5f5f5; border-bottom: 1px solid #e0e0e0; font-size: 13px; }
+        .status-badge { padding: 3px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; }
+        .status-badge.success { background: #e8f5e9; color: #2e7d32; }
+        .status-badge.error { background: #ffeaea; color: #d32f2f; }
+        .result-body { padding: 16px; font-family: 'SF Mono', Consolas, monospace; font-size: 13px; white-space: pre-wrap; word-break: break-word; max-height: 500px; overflow-y: auto; background: #fafafa; }
+        .btn-send { padding: 8px 20px; background: #2e7d32; color: #fff; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; font-weight: 600; margin-top: 16px; }
+        .btn-send:hover { background: #1b5e20; }
+        .btn-load { padding: 8px 20px; background: #e65100; color: #fff; border: none; border-radius: 3px; cursor: pointer; font-size: 14px; font-weight: 600; }
+        .btn-load:hover { background: #bf360c; }
+
+        /* Load test */
+        .load-config { margin-bottom: 16px; }
+        .load-config label { font-size: 13px; font-weight: 600; margin-right: 8px; }
+        .load-config input { padding: 6px 10px; border: 1px solid #ccc; border-radius: 3px; width: 80px; font-size: 13px; }
+        .load-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+        .stat-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; padding: 16px; text-align: center; }
+        .stat-card .stat-value { font-size: 22px; font-weight: 700; }
+        .stat-card .stat-label { font-size: 11px; color: #888; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M30 5 C16 5 5 16 5 30 C5 38 8 44 14 48 L14 38 C10 35 8 33 8 30 C8 18 18 8 30 8 C36 8 40 10 43 14 L48 14 C44 8 38 5 30 5Z" fill="#333333"/>
+                    <path d="M30 55 C44 55 55 44 55 30 C55 22 52 16 46 12 L46 22 C50 25 52 27 52 30 C52 42 42 52 30 52 C24 52 20 50 17 46 L12 46 C16 52 22 55 30 55Z" fill="#666666"/>
+                </svg>
+            </div>
+            <div class="logo-text-group">
+                <span class="logo-name">MZR</span>
+                <span class="logo-subtitle">Bank</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <span id="welcomeUser"></span>
+            <a href="/transaction-aggregation/dashboard.html" class="btn">← Back to Dashboard</a>
+        </div>
+    </header>
+
+    <main class="main">
+        <h1>API Testing Tool</h1>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="single">Single Request</div>
+            <div class="tab" data-tab="load">Load Test</div>
+        </div>
+
+        <!-- SINGLE REQUEST TAB -->
+        <div class="tab-content active" id="tab-single">
+            <div class="api-selector">
+                <select id="apiSelect">
+                    <option value="" disabled selected>Select an API to test...</option>
+                    <optgroup label="Authentication">
+                        <option value="POST|/api/auth/login">POST /api/auth/login — Login</option>
+                        <option value="POST|/api/auth/logout">POST /api/auth/logout — Logout</option>
+                        <option value="POST|/api/token/generate">POST /api/token/generate — Generate API token</option>
+                    </optgroup>
+                    <optgroup label="User">
+                        <option value="GET|/api/user/me">GET /api/user/me — Get profile</option>
+                    </optgroup>
+                    <optgroup label="Transactions">
+                        <option value="GET|/api/transactions">GET /api/transactions — All</option>
+                        <option value="GET|/api/transactions?category=groceries">GET /api/transactions?category=groceries</option>
+                        <option value="GET|/api/transactions?status=successful">GET /api/transactions?status=successful</option>
+                        <option value="GET|/api/transactions?minAmount=1000&maxAmount=10000">GET /api/transactions?minAmount=1000&maxAmount=10000</option>
+                        <option value="GET|/api/transactions?from=2026-06-10T00:00:00&to=2026-06-14T23:59:59">GET /api/transactions?from=...&to=... (date range)</option>
+                        <option value="GET|/api/transactions?sort=amount&order=desc">GET /api/transactions?sort=amount&order=desc</option>
+                        <option value="GET|/api/transactions/payments">GET /api/transactions/payments — Payments</option>
+                        <option value="GET|/api/transactions/payments?category=groceries&sort=amount&order=asc">GET /api/transactions/payments?category&sort</option>
+                        <option value="GET|/api/transactions/transfers">GET /api/transactions/transfers — Transfers</option>
+                        <option value="GET|/api/transactions/aggregate">GET /api/transactions/aggregate — All</option>
+                        <option value="GET|/api/transactions/aggregate?category=groceries">GET /api/transactions/aggregate?category=groceries</option>
+                        <option value="GET|/api/transactions/aggregate?status=successful">GET /api/transactions/aggregate?status=successful</option>
+                    </optgroup>
+                    <optgroup label="Mock APIs">
+                        <option value="GET|/mock/api/payments/1">GET /mock/api/payments/1</option>
+                        <option value="GET|/mock/api/payments/2">GET /mock/api/payments/2</option>
+                        <option value="GET|/mock/api/transfers/1">GET /mock/api/transfers/1</option>
+                        <option value="GET|/mock/api/transfers/3">GET /mock/api/transfers/3</option>
+                    </optgroup>
+                    <optgroup label="Admin">
+                        <option value="GET|/api/admin/rate-limit">GET /api/admin/rate-limit — View limits</option>
+                        <option value="PUT|/api/admin/rate-limit">PUT /api/admin/rate-limit — Update limits</option>
+                        <option value="POST|/api/admin/users/user1/unlock">POST /api/admin/users/{username}/unlock — Unlock user</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div id="singleRequestSection" style="display:none;">
+                <div class="result-panel">
+                    <div class="result-header">
+                        <span id="singleRequestMethod"></span>
+                        <span style="font-size:12px; color:#888;">Request</span>
+                    </div>
+                    <div class="result-body">
+                        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                            <label style="font-size:12px; font-weight:600; min-width:50px;">URL:</label>
+                            <input type="text" id="singleUrl" style="flex:1; padding:6px 10px; font-family:'SF Mono',Consolas,monospace; font-size:13px; border:1px solid #ccc; border-radius:3px;">
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                            <label style="font-size:12px; font-weight:600; min-width:50px;">Method:</label>
+                            <select id="singleMethod" style="padding:6px 10px; font-size:13px; border:1px solid #ccc; border-radius:3px;">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                                <option value="PUT">PUT</option>
+                                <option value="DELETE">DELETE</option>
+                            </select>
+                        </div>
+                        <div id="singleHeaders" style="font-size:12px; color:#888;"></div>
+                    </div>
+                </div>
+
+                <div class="request-body-section" id="singleBodySection">
+                    <label for="singleBody">Request Body (JSON):</label>
+                    <textarea id="singleBody"></textarea>
+                </div>
+
+                <button class="btn-send" id="singleSendBtn">Send</button>
+            </div>
+
+            <div class="result-panel" id="singleResultPanel" style="display:none;">
+                <div class="result-header">
+                    <span id="singleResultMethod"></span>
+                    <span class="status-badge" id="singleResultStatus"></span>
+                </div>
+                <div class="result-body" id="singleResultBody"></div>
+            </div>
+        </div>
+
+        <!-- LOAD TEST TAB -->
+        <div class="tab-content" id="tab-load">
+            <div class="api-selector">
+                <select id="loadApiSelect">
+                    <option value="" disabled selected>Select an API to load test...</option>
+                    <optgroup label="Transactions">
+                        <option value="GET|/api/transactions">GET /api/transactions — All</option>
+                        <option value="GET|/api/transactions?category=groceries">GET /api/transactions?category=groceries</option>
+                        <option value="GET|/api/transactions?status=successful">GET /api/transactions?status=successful</option>
+                        <option value="GET|/api/transactions/payments">GET /api/transactions/payments — Payments</option>
+                        <option value="GET|/api/transactions/transfers">GET /api/transactions/transfers — Transfers</option>
+                        <option value="GET|/api/transactions/aggregate">GET /api/transactions/aggregate — Aggregate</option>
+                    </optgroup>
+                    <optgroup label="Mock APIs (no rate limiting)">
+                        <option value="GET|/mock/api/payments/1">GET /mock/api/payments/1</option>
+                        <option value="GET|/mock/api/transfers/1">GET /mock/api/transfers/1</option>
+                    </optgroup>
+                    <optgroup label="Auth">
+                        <option value="POST|/api/auth/login">POST /api/auth/login</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div id="loadRequestSection" style="display:none;">
+                <div style="display:flex; gap:8px; align-items:center; margin-bottom:12px;">
+                    <label style="font-size:12px; font-weight:600; min-width:50px;">URL:</label>
+                    <input type="text" id="loadUrl" style="flex:1; padding:6px 10px; font-family:'SF Mono',Consolas,monospace; font-size:13px; border:1px solid #ccc; border-radius:3px;">
+                </div>
+
+                <div class="request-body-section" id="loadBodySection">
+                    <label for="loadBody">Request Body (JSON):</label>
+                    <textarea id="loadBody"></textarea>
+                </div>
+
+                <div class="load-config">
+                    <label for="loadCount">Number of requests:</label>
+                    <input type="number" id="loadCount" value="50" min="1" max="1000">
+                    <button class="btn-load" id="runLoadBtn" style="margin-left:12px;">Run Load Test</button>
+                </div>
+
+                <div id="loadResults" style="display:none;">
+                    <h3 style="font-size:14px; margin-bottom:12px;">Results</h3>
+                    <div class="load-stats">
+                        <div class="stat-card"><div class="stat-value" id="statTotal">-</div><div class="stat-label">Total Requests</div></div>
+                        <div class="stat-card"><div class="stat-value" id="statSuccess">-</div><div class="stat-label">Successful</div></div>
+                        <div class="stat-card"><div class="stat-value" id="statFailed">-</div><div class="stat-label">Failed / Rate Limited</div></div>
+                        <div class="stat-card"><div class="stat-value" id="statAvg">-</div><div class="stat-label">Avg Response (ms)</div></div>
+                    </div>
+                    <div class="load-stats" style="margin-top:12px;">
+                        <div class="stat-card"><div class="stat-value" id="statMin">-</div><div class="stat-label">Min (ms)</div></div>
+                        <div class="stat-card"><div class="stat-value" id="statMax">-</div><div class="stat-label">Max (ms)</div></div>
+                        <div class="stat-card"><div class="stat-value" id="statRps">-</div><div class="stat-label">Req/sec</div></div>
+                        <div class="stat-card"><div class="stat-value" id="statDuration">-</div><div class="stat-label">Total Time (ms)</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const token = sessionStorage.getItem('token');
+        if (!token) { window.location.href = '/transaction-aggregation/login.html'; }
+
+        // Admin check + show name
+        fetch('/transaction-aggregation/api/user/me', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(r => { if (r.status === 401) { sessionStorage.clear(); window.location.href = '/transaction-aggregation/login.html'; } return r.json(); })
+        .then(user => {
+            if (user && user.role !== 'ADMIN') {
+                document.querySelector('.main').innerHTML = '<div style="text-align:center;padding:80px 20px;"><h2 style="margin-bottom:16px;">Not Authorized</h2><p style="color:#666;margin-bottom:24px;">You do not have permission to access the API Testing Tool.</p><a href="/transaction-aggregation/dashboard.html" class="btn" style="display:inline-block;padding:10px 24px;background:#555;color:#fff;text-decoration:none;border-radius:3px;">Back to Dashboard</a></div>';
+            } else if (user) {
+                document.getElementById('welcomeUser').textContent = user.firstName + ' ' + user.lastName;
+            }
+        });
+
+        // --- TAB SWITCHING ---
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // --- SINGLE REQUEST ---
+        const sampleBodies = {
+            'POST|/api/auth/login': JSON.stringify({ username: "admin", password: "admin123" }, null, 2),
+            'PUT|/api/admin/rate-limit': JSON.stringify({ loginLimit: 10, apiLimit: 120, tokenGenerateLimit: 5 }, null, 2)
+        };
+
+        document.getElementById('apiSelect').addEventListener('change', () => {
+            const val = document.getElementById('apiSelect').value;
+            const [method, path] = val.split('|');
+
+            document.getElementById('singleRequestSection').style.display = 'block';
+            document.getElementById('singleResultPanel').style.display = 'none';
+            document.getElementById('singleRequestMethod').textContent = method + ' ' + path;
+            document.getElementById('singleUrl').value = '/transaction-aggregation' + path;
+            document.getElementById('singleMethod').value = method;
+            document.getElementById('singleHeaders').textContent = path.startsWith('/api/auth/login')
+                ? 'Headers: Content-Type: application/json'
+                : 'Headers: Content-Type: application/json, Authorization: Bearer <token>';
+
+            if (method === 'POST' || method === 'PUT') {
+                document.getElementById('singleBodySection').classList.add('visible');
+                document.getElementById('singleBody').value = sampleBodies[val] || '{}';
+            } else {
+                document.getElementById('singleBodySection').classList.remove('visible');
+            }
+        });
+
+        document.getElementById('singleMethod').addEventListener('change', () => {
+            const m = document.getElementById('singleMethod').value;
+            if (m === 'POST' || m === 'PUT') { document.getElementById('singleBodySection').classList.add('visible'); }
+            else { document.getElementById('singleBodySection').classList.remove('visible'); }
+        });
+
+        document.getElementById('singleSendBtn').addEventListener('click', async () => {
+            const url = document.getElementById('singleUrl').value;
+            const method = document.getElementById('singleMethod').value;
+            const options = buildOptions(url, method, document.getElementById('singleBody').value);
+
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                document.getElementById('singleResultPanel').style.display = 'block';
+                document.getElementById('singleResultMethod').textContent = method + ' ' + url.replace('/transaction-aggregation', '') + ' — Response';
+                const s = document.getElementById('singleResultStatus');
+                s.textContent = response.status + ' ' + response.statusText;
+                s.className = 'status-badge ' + (response.ok ? 'success' : 'error');
+                document.getElementById('singleResultBody').textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                document.getElementById('singleResultPanel').style.display = 'block';
+                document.getElementById('singleResultMethod').textContent = method + ' — Response';
+                document.getElementById('singleResultStatus').textContent = 'ERROR';
+                document.getElementById('singleResultStatus').className = 'status-badge error';
+                document.getElementById('singleResultBody').textContent = 'Request failed: ' + e.message;
+            }
+        });
+
+        // --- LOAD TEST ---
+        const loadSampleBodies = {
+            'POST|/api/auth/login': JSON.stringify({ username: "admin", password: "admin123" }, null, 2)
+        };
+
+        document.getElementById('loadApiSelect').addEventListener('change', () => {
+            const val = document.getElementById('loadApiSelect').value;
+            const [method, path] = val.split('|');
+            document.getElementById('loadRequestSection').style.display = 'block';
+            document.getElementById('loadUrl').value = '/transaction-aggregation' + path;
+            document.getElementById('loadResults').style.display = 'none';
+
+            if (method === 'POST') {
+                document.getElementById('loadBodySection').classList.add('visible');
+                document.getElementById('loadBody').value = loadSampleBodies[val] || '{}';
+            } else {
+                document.getElementById('loadBodySection').classList.remove('visible');
+            }
+        });
+
+        document.getElementById('runLoadBtn').addEventListener('click', async () => {
+            const url = document.getElementById('loadUrl').value;
+            const val = document.getElementById('loadApiSelect').value;
+            const method = val.split('|')[0];
+            const count = parseInt(document.getElementById('loadCount').value) || 50;
+
+            document.getElementById('runLoadBtn').disabled = true;
+            document.getElementById('runLoadBtn').textContent = 'Running...';
+            document.getElementById('loadResults').style.display = 'block';
+            ['statTotal','statSuccess','statFailed','statAvg','statMin','statMax','statRps','statDuration'].forEach(id => {
+                document.getElementById(id).textContent = '...';
+            });
+
+            const options = buildOptions(url, method, document.getElementById('loadBody').value);
+            const startTime = performance.now();
+            const results = [];
+
+            const promises = Array.from({length: count}, async () => {
+                const reqStart = performance.now();
+                try {
+                    const r = await fetch(url, {...options});
+                    results.push({success: r.ok, duration: performance.now() - reqStart});
+                } catch (e) {
+                    results.push({success: false, duration: performance.now() - reqStart});
+                }
+            });
+
+            await Promise.all(promises);
+            const totalDuration = performance.now() - startTime;
+
+            const successful = results.filter(r => r.success).length;
+            const durations = results.map(r => r.duration);
+            const avg = durations.reduce((a, b) => a + b, 0) / durations.length;
+
+            document.getElementById('statTotal').textContent = results.length;
+            document.getElementById('statSuccess').textContent = successful;
+            document.getElementById('statFailed').textContent = results.length - successful;
+            document.getElementById('statAvg').textContent = avg.toFixed(0);
+            document.getElementById('statMin').textContent = Math.min(...durations).toFixed(0);
+            document.getElementById('statMax').textContent = Math.max(...durations).toFixed(0);
+            document.getElementById('statRps').textContent = (results.length / (totalDuration / 1000)).toFixed(1);
+            document.getElementById('statDuration').textContent = totalDuration.toFixed(0);
+
+            document.getElementById('runLoadBtn').disabled = false;
+            document.getElementById('runLoadBtn').textContent = 'Run Load Test';
+        });
+
+        // --- SHARED ---
+        function buildOptions(url, method, body) {
+            const opts = { method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token } };
+            if ((method === 'POST' || method === 'PUT') && body && body.trim()) { opts.body = body; }
+            if (url.includes('/api/auth/login')) { delete opts.headers['Authorization']; }
+            return opts;
+        }
+    </script>
+</body>
+</html>
