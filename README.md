@@ -196,6 +196,16 @@ src/main/java/com/api/transaction_aggregation/
 | `payments` | Mock payment transactions |
 | `transfers` | Mock transfer transactions |
 
+## Solution Architecture
+
+See the full solution diagram: [docs/solution-diagram.png](docs/solution-diagram.png)
+
+The system follows a layered architecture with:
+- **Login flow** — credentials validated against SSO table, JWT issued with session cached in Guava
+- **Dashboard flow** — JWT validated via filter, user profile loaded from cache, role checked for feature access
+- **Transaction flow** — TransactionService aggregates data from MockPaymentTransactionsAPI and MockTransferTransactionsAPI
+- **API Testing flow** — admin role verified, requests sent with JWT, responses rendered
+
 ## Prerequisites
 
 ### Option A: Docker (Recommended)
@@ -261,6 +271,101 @@ The app starts on `http://localhost:8080/transaction-aggregation/`
 | admin | admin123 | ADMIN | Active |
 | user1 | user123 | USER | Active |
 | user2 | user234 | USER | Locked |
+
+## Testing
+
+### Option A: GUI (Browser)
+
+1. Open `http://localhost:8080/transaction-aggregation/login.html`
+2. Login with `admin` / `admin123`
+3. Dashboard loads with transaction data, charts, and tables
+4. Click "API Testing Tool" (admin only) to test any endpoint interactively
+
+### Option B: Pure API (curl / Postman)
+
+Complete walkthrough — no browser needed:
+
+```bash
+# Step 1: Login and get a session token
+TOKEN=$(curl -s -X POST http://localhost:8080/transaction-aggregation/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"admin123"}' | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+
+echo "Token: $TOKEN"
+
+# Step 2: Get user profile
+curl -s http://localhost:8080/transaction-aggregation/api/user/me \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 3: Get all transactions
+curl -s http://localhost:8080/transaction-aggregation/api/transactions \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 4: Filter by category
+curl -s "http://localhost:8080/transaction-aggregation/api/transactions?category=groceries" \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 5: Filter by status
+curl -s "http://localhost:8080/transaction-aggregation/api/transactions?status=failed" \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 6: Filter by amount range
+curl -s "http://localhost:8080/transaction-aggregation/api/transactions?minAmount=1000&maxAmount=10000" \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 7: Filter by date range
+curl -s "http://localhost:8080/transaction-aggregation/api/transactions?from=2026-06-10T00:00:00&to=2026-06-12T23:59:59" \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 8: Sort by amount descending
+curl -s "http://localhost:8080/transaction-aggregation/api/transactions?sort=amount&order=desc" \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 9: Combined filters
+curl -s "http://localhost:8080/transaction-aggregation/api/transactions?category=groceries&status=successful&sort=amount&order=asc" \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 10: Payments only
+curl -s http://localhost:8080/transaction-aggregation/api/transactions/payments \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 11: Transfers only (with account details)
+curl -s http://localhost:8080/transaction-aggregation/api/transactions/transfers \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 12: Aggregation summary
+curl -s http://localhost:8080/transaction-aggregation/api/transactions/aggregate \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 13: Aggregation filtered (successful only)
+curl -s "http://localhost:8080/transaction-aggregation/api/transactions/aggregate?status=successful" \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 14: Generate RSA-signed API token (admin only)
+curl -s -X POST http://localhost:8080/transaction-aggregation/api/token/generate \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 15: View rate limits (admin)
+curl -s http://localhost:8080/transaction-aggregation/api/admin/rate-limit \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 16: Unlock a user (admin)
+curl -s -X POST http://localhost:8080/transaction-aggregation/api/admin/users/user1/unlock \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 17: Logout
+curl -s -X POST http://localhost:8080/transaction-aggregation/api/auth/logout \
+  -H "Authorization: Bearer $TOKEN" | jq
+
+# Step 18: Verify token no longer works after logout
+curl -s http://localhost:8080/transaction-aggregation/api/user/me \
+  -H "Authorization: Bearer $TOKEN" | jq
+# Expected: {"error":"Session expired. Please log in again.","status":401}
+```
+
+### Option C: Swagger UI
+
+Open `http://localhost:8080/transaction-aggregation/swagger-ui.html` for interactive API documentation.
 
 ## Quick Test
 
